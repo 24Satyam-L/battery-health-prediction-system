@@ -66,21 +66,6 @@ def apply_linear_regression(Cleaned_SOH):
     train_mse = mean_squared_error(y_train, y_train_pred)
     test_mse = mean_squared_error(y_test, y_test_pred)
 
-    print(f"Train MAE: {train_mae}, Test MAE: {test_mae}")
-    print(f"Train MSE: {train_mse}, Test MSE: {test_mse}")
-
-    # Plotting the regression line
-    plt.figure(figsize=(10,6))
-    plt.scatter(Cleaned_SOH['Cycle Pair'], Cleaned_SOH['SOH'], color='blue', label='Data Points')
-    #plot traun and test predictions
-    plt.plot(X_train, y_train_pred, color='red', label='Train Prediction')
-    plt.plot(X_test, y_test_pred, color='green', label='Test Prediction')
-    plt.xlabel('Cycle Pair')
-    plt.ylabel('SOH')
-    plt.title('Linear Regression Model for SOH Prediction')
-    plt.legend()
-    plt.show()
-
     slope = model.coef_[0]
     intercept = model.intercept_
 
@@ -121,46 +106,26 @@ def apply_polynomial_regression(Cleaned_SOH):
     train_mse = mean_squared_error(y_train, y_train_pred)
     test_mse = mean_squared_error(y_test, y_test_pred)
 
-    print(f"Train MAE: {train_mae}, Test MAE: {test_mae}")
-    print(f"Train MSE: {train_mse}, Test MSE: {test_mse}")
-
-    # Plotting the regression line
-    plt.figure(figsize=(10,6))
-    plt.scatter(Cleaned_SOH['Cycle Pair'], Cleaned_SOH['SOH'], color='blue', label='Data Points')
-    plt.plot(X_train, y_train_pred, color='red', label='Train Prediction')
-    plt.plot(X_test, y_test_pred, color='green', label='Test Prediction')
-    plt.xlabel('Cycle Pair')
-    plt.ylabel('SOH')
-    plt.title('Polynomial Regression Model for SOH Prediction')
-    plt.legend()
-    plt.show()
 
     return {'coefficients': model.coef_, 'intercept': model.intercept_, 'train_mae': train_mae, 'test_mae': test_mae, 'train_mse': train_mse, 'test_mse': test_mse}
 
 def split_data(Cleaned_SOH,spike_idx):
     if spike_idx !=0:
-        return {"Segment 1":Cleaned_SOH.iloc[:spike_idx], "Segment 2":Cleaned_SOH.iloc[spike_idx:]}
+        return {"Pre Spike":Cleaned_SOH.iloc[:spike_idx], "Post Spike":Cleaned_SOH.iloc[spike_idx:]}
     else:
-        return {"Segment 1":Cleaned_SOH}
+        return {"Pre Spike":Cleaned_SOH}
 
 
-def model_selector( Error_Linear, Error_Polynomial):
-    if Error_Linear > Error_Polynomial:
-        print("Polynomial Regression model performs better.")
-        return "Polynomial Regression"
-    else:
-        print("Linear Regression model performs better.")
-        return "Linear Regression"
     
 def main(folder_path):
+    Regression_Results = []
     for files in os.listdir(folder_path):
         if files.endswith(".csv"):
             file_path = os.path.join(folder_path, files)
             SOH_df = Battery_Dataset(file_path)
 
-            Battery_Name = os.path.basename(file_path).split('.')[0]
-
-            Regression_Results = []
+            Battery_Name = os.path.basename(file_path).split('.')[0].split('_')[0] # Extracting battery name from file name
+  
             #Removing Outliers
             SOH_Cleaned = Outlier_Removal(SOH_df)
 
@@ -173,18 +138,18 @@ def main(folder_path):
             #Looping through segments and applying models
             for segment_name, segment_data in Segments.items():
                 print(f"Processing {segment_name}...")
-                if segment_name == "Segment 1":
-                    print("Comparing models for Segment 1...")
+                if segment_name == "Pre Spike" and Spike_idx != 0:
+                    print("Comparing models for Segment Pre Spike...")
 
                     Linear_Results = apply_linear_regression(segment_data)
                     Polynomial_Results = apply_polynomial_regression(segment_data)
 
                     if Linear_Results['test_mae'] > Polynomial_Results['test_mae']:
-                        print("Polynomial Regression model performs better for Segment 1.")
+                        print("Polynomial Regression model performs better for Pre Spike.")
                         Chosen_Model = "Polynomial Regression"
                         Chosen_results = Polynomial_Results
                     else:
-                        print("Linear Regression model performs better for Segment 1.")
+                        print("Linear Regression model performs better for Pre Spike.")
                         Chosen_Model = "Linear Regression"
                         Chosen_results = Linear_Results
                 else:
@@ -201,7 +166,7 @@ def main(folder_path):
 
 if __name__ == "__main__":
     folder_path = rf"{input('Enter the folder path containing the CSV files: ')}"
-    results_df = main()
+    results_df = main(folder_path)
     print(results_df)
 
             
