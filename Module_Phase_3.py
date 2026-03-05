@@ -128,7 +128,7 @@ def Estimate_RUL(Battery, Results_DF, Latest_Cycle):
     if Slope < 0:
         predicted_cycle = int((0.8 - Intercept) / Slope)
 
-        Remaining_Cycles = int(predicted_cycle - Latest_Cycle)
+        Remaining_Cycles = max(0, int(predicted_cycle - Latest_Cycle))
 
         return predicted_cycle, Remaining_Cycles
     else:
@@ -196,6 +196,11 @@ if __name__ == "__main__":
     #print(results_df)
     results_df.to_csv(rf"C:\Projects\Battery Engineering\Summary Files\Regression_Results (Phase_3).csv", index=False)
     cycle_estimation_df.to_csv(rf"C:\Projects\Battery Engineering\Summary Files\Battery_Cycle_Estimation .csv", index=False)
+
+    Final_Results = pd.merge(results_df, cycle_estimation_df, on='Battery', how='left')
+    Final_Results.drop(index=Final_Results[Final_Results['Segment'] == 'Pre Spike'].index, inplace=True)
+    Final_Results.drop(columns=['Train_MAE', 'Test_MAE'], inplace=True)
+    Final_Results.to_csv(rf"C:\Projects\Battery Engineering\Summary Files\Final_Results_Phase_3.csv", index=False)
 
 
 
