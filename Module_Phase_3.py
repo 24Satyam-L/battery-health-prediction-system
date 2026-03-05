@@ -2,8 +2,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import LinearRegression
-from sklearn.model_selection import mean_squared_error,mean_absolute_error
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error,mean_absolute_error
 import os
 
 #Load Dataset 
@@ -106,14 +106,33 @@ def apply_polynomial_regression(Cleaned_SOH):
     train_mse = mean_squared_error(y_train, y_train_pred)
     test_mse = mean_squared_error(y_test, y_test_pred)
 
+    #Calculating Slope
+    a = model.coef_[2] # Coefficient of the squared term
+    b = model.coef_[1] # Coefficient of the linear term
+    slope = a*(X.min()+X.max()) + b # Slope at the midpoint of the data range
 
-    return {'coefficients': model.coef_, 'intercept': model.intercept_, 'train_mae': train_mae, 'test_mae': test_mae, 'train_mse': train_mse, 'test_mse': test_mse}
+
+    return {'slope': slope, 'intercept': model.intercept_, 'train_mae': train_mae, 'test_mae': test_mae, 'train_mse': train_mse, 'test_mse': test_mse}
 
 def split_data(Cleaned_SOH,spike_idx):
     if spike_idx !=0:
         return {"Pre Spike":Cleaned_SOH.iloc[:spike_idx], "Post Spike":Cleaned_SOH.iloc[spike_idx:]}
     else:
-        return {"Pre Spike":Cleaned_SOH}
+        return {"No Spike":Cleaned_SOH}
+    
+def Estimate_RUL(Battery, Results_DF, Latest_Cycle):
+    # Assuming SOH reaches 80 % at the end of battery life
+    Battery_Results = Results_DF[(Results_DF['Battery'] == Battery) & (Results_DF['Segment'].isin(['Post Spike','No Spike']))].tail(1)
+    Slope = Battery_Results['Slope'].values[0]
+    Intercept = Battery_Results['Intercept'].values[0]
+    if Slope < 0:
+        predicted_cycle = int((0.8 - Intercept) / Slope)
+
+        Remaining_Cycles = int(predicted_cycle - Latest_Cycle)
+
+        return predicted_cycle, Remaining_Cycles
+    else:
+        return float('inf'), float('inf')  # Infinite RUL if slope is zero (no degradation)
 
 
     
@@ -123,6 +142,7 @@ def main(folder_path):
         if files.endswith(".csv"):
             file_path = os.path.join(folder_path, files)
             SOH_df = Battery_Dataset(file_path)
+            Latest_Cycle = SOH_df['Cycle Pair'].max()
 
             Battery_Name = os.path.basename(file_path).split('.')[0].split('_')[0] # Extracting battery name from file name
   
@@ -137,19 +157,15 @@ def main(folder_path):
 
             #Looping through segments and applying models
             for segment_name, segment_data in Segments.items():
-                print(f"Processing {segment_name}...")
-                if segment_name == "Pre Spike" and Spike_idx != 0:
-                    print("Comparing models for Segment Pre Spike...")
+                if (segment_name == "Pre Spike" and Spike_idx != 0) or segment_name == "No Spike":
 
                     Linear_Results = apply_linear_regression(segment_data)
                     Polynomial_Results = apply_polynomial_regression(segment_data)
 
                     if Linear_Results['test_mae'] > Polynomial_Results['test_mae']:
-                        print("Polynomial Regression model performs better for Pre Spike.")
                         Chosen_Model = "Polynomial Regression"
                         Chosen_results = Polynomial_Results
                     else:
-                        print("Linear Regression model performs better for Pre Spike.")
                         Chosen_Model = "Linear Regression"
                         Chosen_results = Linear_Results
                 else:
@@ -159,18 +175,27 @@ def main(folder_path):
                     Chosen_Model = "Linear Regression"
                     Chosen_results = Results
 
-                Regression_Results.append({'Battery': Battery_Name, 'Segment': segment_name, 'Model': Chosen_Model, 'Train_MAE': Chosen_results['train_mae'], 'Test_MAE': Chosen_results['test_mae'], 'Train_MSE': Chosen_results['train_mse'], 'Test_MSE': Chosen_results['test_mse']})
+                Regression_Results.append({'Battery': Battery_Name, 'Segment': segment_name, 'Model': Chosen_Model, 'Slope': Chosen_results.get('slope', None), 'Intercept': Chosen_results.get('intercept', None), 'Train_MAE': Chosen_results['train_mae'], 'Test_MAE': Chosen_results['test_mae'], 'Train_MSE': Chosen_results['train_mse'], 'Test_MSE': Chosen_results['test_mse']})
 
-    return pd.DataFrame(Regression_Results)
+    Result_DF = pd.DataFrame(Regression_Results)
+
+    Cycle_Estimation = []
+
+    for battery in Result_DF['Battery'].unique():
+        predicted_cycle, remaining_cycles = Estimate_RUL(battery, Result_DF, Latest_Cycle)
+        Cycle_Estimation.append({'Battery': battery, 'Predicted_End_of_Life_Cycle': predicted_cycle, 'Remaining_Cycles': remaining_cycles})
+
+    Cycle_Estimation_DF = pd.DataFrame(Cycle_Estimation)
+
+    return Result_DF, Cycle_Estimation_DF
 
 
 if __name__ == "__main__":
-    folder_path = rf"{input('Enter the folder path containing the CSV files: ')}"
-    results_df = main(folder_path)
-    print(results_df)
-
-            
-
+    folder_path = rf"C:\Projects\Battery Engineering\Summary Files\Overall Summary"
+    results_df, cycle_estimation_df = main(folder_path)
+    #print(results_df)
+    results_df.to_csv(rf"C:\Projects\Battery Engineering\Summary Files\Regression_Results (Phase_3).csv", index=False)
+    cycle_estimation_df.to_csv(rf"C:\Projects\Battery Engineering\Summary Files\Battery_Cycle_Estimation .csv", index=False)
 
 
 
