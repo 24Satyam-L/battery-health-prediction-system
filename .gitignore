@@ -1,3 +1,28 @@
 .venv/
 __pycache__/
 .DS_Store
+
+# Ignore dataset files
+*.csv
+
+# Ignore large data folders
+data/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+#ZIP files
+*.zip
+
+#Ignoring Other files
+Timeline.docx
+Project Journal.docx
+Phase Wise Daily Tasks.txt
