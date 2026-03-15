@@ -2,8 +2,6 @@
 __pycache__/
 .DS_Store
 
-# Ignore dataset files
-*.csv
 
 # Ignore large data folders
 data/
