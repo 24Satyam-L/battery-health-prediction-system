@@ -4,7 +4,7 @@ import numpy as np
 
 # 1. Load Metadata 
 def load_metadata():
-    metadata = pd.read_excel(rf"C:\Projects\Battery Engineering\Inventory.xlsx", sheet_name="Sheet1")
+    metadata = pd.read_excel(rf"C:\Projects\Battery Engineering\extra_infos\Inventory.xlsx", sheet_name="Sheet1")
     return metadata
 
 # 2. Processing Charge Data
@@ -46,6 +46,7 @@ def process_charge_data(Bat, metadata):
             summary_dict['min_dVdt']=temp_cycle['dV/dt'].min()
             summary_dict['average_dVdt']=temp_cycle['dV/dt'].mean()
             #temperature Statistics
+            summary_dict['Ambient_Temperature']=row['ambient_temperature']
             summary_dict['max_temp']=temp_cycle['Temperature_measured'].max()
             summary_dict['min_temp']=temp_cycle['Temperature_measured'].min()
             summary_dict['average_temp']=temp_cycle['Temperature_measured'].mean()
@@ -109,6 +110,7 @@ def process_discharge_data(Bat, metadata,cutoff_voltage):
             summary_dict['min_dVdt']=temp_cycle['dV/dt'].min()
             summary_dict['average_dVdt']=temp_cycle['dV/dt'].mean()
             #temperature Statistics
+            summary_dict['Ambient_Temperature']=row['ambient_temperature']
             summary_dict['max_temp']=temp_cycle['Temperature_measured'].max()
             summary_dict['min_temp']=temp_cycle['Temperature_measured'].min()
             summary_dict['average_temp']=temp_cycle['Temperature_measured'].mean()
@@ -174,6 +176,7 @@ def overall_summary(Bat, CHG, DCHG):
         overall_dict['Average_Charge_Voltage']=Charge_Summary.iloc[i]['average_voltage']
         overall_dict['Average_Discharge_Voltage']=Discharge_Summary.iloc[i]['average_voltage']
         overall_dict['Voltage Hysteresis']=overall_dict['Average_Charge_Voltage'] - overall_dict['Average_Discharge_Voltage']
+        overall_dict['Ambient Temperature']=max(Charge_Summary.iloc[i]['Ambient_Temperature'], Discharge_Summary.iloc[i]['Ambient_Temperature'])
         overall_dict['Max Charge Temperature']=Charge_Summary.iloc[i]['max_temp']
         overall_dict['Max Discharge Temperature']=Discharge_Summary.iloc[i]['max_temp']
         overall_dict['Charge_Tempaerature_Rise_Rate']=Charge_Summary.iloc[i]['Rise_temp_per_Sec']
@@ -212,7 +215,7 @@ def overall_summary(Bat, CHG, DCHG):
 def main():
     metadata=load_metadata()
 
-    bat_Cutoff_df=pd.read_csv(rf"C:\Projects\Battery Engineering\Battery Cutoff Voltage.csv")
+    bat_Cutoff_df=pd.read_csv(rf"C:\Projects\Battery Engineering\extra_infos\Battery Cutoff Voltage.csv")
 
 
     battery_list=metadata['Battery ID'].unique()
