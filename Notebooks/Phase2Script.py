@@ -40,6 +40,7 @@ def process_charge_data(Bat, metadata):
         summary_dict['min_dVdt']=temp_cycle['dV/dt'].min()
         summary_dict['average_dVdt']=temp_cycle['dV/dt'].mean()
         #temperature Statistics
+        summary_dict['Ambient_Temperature']=row['ambient_temperature']
         summary_dict['max_temp']=temp_cycle['Temperature_measured'].max()
         summary_dict['min_temp']=temp_cycle['Temperature_measured'].min()
         summary_dict['average_temp']=temp_cycle['Temperature_measured'].mean()
@@ -97,6 +98,7 @@ def process_discharge_data(Bat, metadata):
         summary_dict['min_dVdt']=temp_cycle['dV/dt'].min()
         summary_dict['average_dVdt']=temp_cycle['dV/dt'].mean()
         #temperature Statistics
+        summary_dict['Ambient_Temperature']=row['ambient_temperature']
         summary_dict['max_temp']=temp_cycle['Temperature_measured'].max()
         summary_dict['min_temp']=temp_cycle['Temperature_measured'].min()
         summary_dict['average_temp']=temp_cycle['Temperature_measured'].mean()
@@ -147,6 +149,7 @@ def overall_summary(Bat, metadata):
         overall_dict['Average_Charge_Voltage']=Charge_Summary.iloc[i]['average_voltage']
         overall_dict['Average_Discharge_Voltage']=Discharge_Summary.iloc[i]['average_voltage']
         overall_dict['Voltage Hysteresis']=overall_dict['Average_Charge_Voltage'] - overall_dict['Average_Discharge_Voltage']
+        overall_dict['Ambient Temperature']=min(Charge_Summary.iloc[i]['Ambient_Temperature'], Discharge_Summary.iloc[i]['Ambient_Temperature'])
         overall_dict['Max Charge Temperature']=Charge_Summary.iloc[i]['max_temp']
         overall_dict['Max Discharge Temperature']=Discharge_Summary.iloc[i]['max_temp']
         overall_dict['Charge_Tempaerature_Rise_Rate']=Charge_Summary.iloc[i]['Rise_temp_per_Sec']
