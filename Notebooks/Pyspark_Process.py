@@ -270,10 +270,106 @@ discharge_summary = discharge_summary.selectExpr(
 
 final_summary = charge_summary.join(discharge_summary,on=["battery_id", "cycle_id"],how="inner")
 
+rename_dict = {
+    "charge_ah": "charge_capacity_ah",
+    "charge_wh": "charge_energy_wh",
+    "charge_duration": "charge_duration_sec",
+    "charge_avg_voltage": "charge_voltage_avg",
+    "charge_max_voltage": "charge_voltage_max",
+    "charge_min_voltage": "charge_voltage_min",
+    "charge_max_temp": "charge_temp_max",
+    "charge_temp_rise": "charge_temp_rise",
+
+    "discharge_ah": "discharge_capacity_ah",
+    "discharge_wh": "discharge_energy_wh",
+    "discharge_duration": "discharge_duration_sec",
+    "discharge_avg_voltage": "discharge_voltage_avg",
+    "discharge_max_voltage": "discharge_voltage_max",
+    "discharge_min_voltage": "discharge_voltage_min",
+    "discharge_max_temp": "discharge_temp_max",
+    "discharge_temp_rise": "discharge_temp_rise"
+}
+
+for old, new in rename_dict.items():
+    final_summary = final_summary.withColumnRenamed(old, new)
 
 
-# 13. Show results
-final_summary.show(5)
-final_summary.printSchema()
+# --- Coulombic Efficiency ---
+final_summary = final_summary.withColumn(
+    "coulombic_efficiency",
+    try_divide(col("discharge_capacity_ah"), col("charge_capacity_ah"))
+)
+
+# --- Energy Efficiency ---
+final_summary = final_summary.withColumn(
+    "energy_efficiency",
+    try_divide(col("discharge_energy_wh"), col("charge_energy_wh"))
+)
+
+# --- SOH (State of Health) ---
+window_spec = Window.partitionBy("battery_id").orderBy("cycle_id")
+
+final_summary = final_summary.withColumn(
+    "initial_capacity",
+    first("discharge_capacity_ah").over(window_spec)
+)
+
+final_summary = final_summary.withColumn(
+    "soh",
+    try_divide(col("discharge_capacity_ah"), col("initial_capacity"))
+)
+final_summary = final_summary.withColumn(
+    "prev_soh",
+    lag("soh").over(window_spec)
+)
+
+final_summary = final_summary.withColumn(
+    "capacity_fade",
+    col("prev_soh") - col("soh")
+)
+
+final_summary = final_summary.withColumn(
+    "coulombic_efficiency",
+    col("coulombic_efficiency") * 100
+)
+
+final_summary = final_summary.withColumn(
+    "energy_efficiency",
+    col("energy_efficiency") * 100
+)
+
+final_summary = final_summary.withColumn(
+    "soh",
+    col("soh") * 100
+)
+
+final_summary = final_summary.select(
+    "battery_id",
+    "cycle_id",
+    "charge_capacity_ah",
+    "discharge_capacity_ah",
+    "charge_energy_wh",
+    "discharge_energy_wh",
+    "coulombic_efficiency",
+    "energy_efficiency",
+    "soh",
+    "capacity_fade",
+    "charge_duration_sec",
+    "discharge_duration_sec",
+    "charge_voltage_avg",
+    "discharge_voltage_avg",
+    "charge_temp_max",
+    "discharge_temp_max"
+)
+
+final_summary = final_summary.orderBy("battery_id", "cycle_id")
+
+
+final_summary.orderBy("battery_id", "cycle_id") \
+    .coalesce(1) \
+    .write \
+    .mode("overwrite") \
+    .option("header", True) \
+    .csv("C:/Projects/Battery Engineering/Summary Files/Spark_battery_dataset_csv")
 
 
