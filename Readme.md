@@ -1,10 +1,38 @@
-# 🔋 Battery Intelligence System
+# 🔋 Battery Health & Predictive Maintenance System
 
 An end-to-end data engineering and analytics system for lithium-ion battery monitoring, feature engineering, health forecasting (SOH), and rule-based decision intelligence.
 
 This project simulates a real-world battery analytics pipeline used in EVs and energy systems, integrating data processing, modeling, backend APIs, and visualization.
 
 ---
+
+## 🔧 Problem Statement
+
+Lithium-ion batteries degrade over time due to charge/discharge cycles, temperature variations, and usage patterns. 
+
+In real-world EV and energy storage systems, this leads to:
+- Reduced battery performance
+- Unexpected failures
+- Safety risks due to thermal issues
+- Inefficient maintenance scheduling
+
+This project builds an end-to-end Battery Intelligence System that:
+- Processes raw battery time-series data
+- Extracts meaningful performance features
+- Predicts State of Health (SOH) and Remaining Useful Life (RUL)
+- Detects thermal and usage anomalies
+- Provides actionable maintenance recommendations
+
+The goal is to simulate a real-world battery monitoring and decision-support system used in EVs and energy platforms.
+
+## 🧪 Use Case
+
+This system can be applied in:
+
+- Electric Vehicles (EVs) → battery health monitoring & replacement planning  
+- Energy Storage Systems → lifecycle optimization  
+- Battery Manufacturing → performance validation & testing  
+- Fleet Management → predictive maintenance and cost reduction  
 
 ## 🚀 Key Features
 
