@@ -170,7 +170,13 @@ Outputs:
 
 
 ## 🏗️ Architecture Diagram
-![Architecture](architecture-1.png)
+![alt text](architecture.png)
+
+## Screenshots
+![alt text](dashboard.png)
+![alt text](analysis.png)
+![alt text](api_response.png)
+![alt text](SwaggerUI.png)
 
 ---
 

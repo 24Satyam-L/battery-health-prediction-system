@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 
-from service import run_analyis,run_prediction,run_recommendation
+from .service import run_analyis,run_prediction,run_recommendation
 
 from typing import List, Optional
 import pandas as pd
-from schemas import BatteryRequest
+from .schemas import BatteryRequest
 
 import sys
 import os

@@ -1,20 +1,28 @@
 import sys
 import os
 import pandas as pd
-from schemas import BatteryRequest
+from .schemas import BatteryRequest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from Decision_Rules.Battery_State_builder import build_battery_state
+from src.decision_engine.Battery_State_builder import build_battery_state
 
-from Decision_Rules.Battery_Thermal_Rules import summarize_thermal,evaluate_thermal
+from src.decision_engine.Battery_Thermal_Rules import summarize_thermal,evaluate_thermal
 
-from Decision_Rules.Battery_Health_Rules import summarize_battery_health,evaluate_battery_health
-from Decision_Rules.Battery_Usage_Rules import summarize_usage,evaluate_usage
-from Decision_Rules.Battery_Decision_Engine import final_decision_engine
+from src.decision_engine.Battery_Health_Rules import summarize_battery_health,evaluate_battery_health
+from src.decision_engine.Battery_Usage_Rules import summarize_usage,evaluate_usage
+from src.decision_engine.Battery_Decision_Engine import final_decision_engine
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+SUMMARY_PATH = os.path.join(
+    BASE_DIR,
+    "outputs",
+    "Combined_Forecasting_Results.csv"
+)
 
 def load_summary(battery_id):
-    df = pd.read_csv(rf"C:\Projects\Battery Engineering\Summary Files\Final_Results_Phase_3.csv")
+    df = pd.read_csv(SUMMARY_PATH)
 
     filtered = df[df["Battery"] == battery_id]
 
