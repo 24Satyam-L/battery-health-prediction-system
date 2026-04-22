@@ -38,9 +38,9 @@ def save_summary(metadata_path, cutoff_path, root_path, save_path):
         cycle_df=overall_summary(Bat, Chg, Dis)
         
 
-        Chg.to_csv(rf"{save_path}/charge_summary/Battery_{Bat}_Charge_Summary.csv", index=False)
-        Dis.to_csv(rf"{save_path}/discharge_summary/Battery_{Bat}_Discharge_Summary.csv", index=False)
-        cycle_df.to_csv(rf"{save_path}/overall_summary/Battery_{Bat}_combined_Summary.csv", index=False)
+        Chg.to_csv(rf"{save_path}/charge_summary/{Bat}_Charge_Summary.csv", index=False)
+        Dis.to_csv(rf"{save_path}/discharge_summary/{Bat}_Discharge_Summary.csv", index=False)
+        cycle_df.to_csv(rf"{save_path}/overall_summary/{Bat}_combined_Summary.csv", index=False)
         
         
 

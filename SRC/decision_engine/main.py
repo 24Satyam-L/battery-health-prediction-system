@@ -1,8 +1,8 @@
-from Battery_State_builder import build_battery_state
-from Battery_Thermal_Rules import evaluate_thermal, summarize_thermal
-from Battery_Health_Rules import evaluate_battery_health, summarize_battery_health
-from Battery_Usage_Rules import evaluate_usage,summarize_usage
-from Battery_Decision_Engine import final_decision_engine  
+from .Battery_State_builder import build_battery_state
+from .Battery_Thermal_Rules import evaluate_thermal, summarize_thermal
+from .Battery_Health_Rules import evaluate_battery_health, summarize_battery_health
+from .Battery_Usage_Rules import evaluate_usage,summarize_usage
+from .Battery_Decision_Engine import final_decision_engine  
 
 
 import pandas as pd
@@ -34,8 +34,8 @@ def Battery_Diagnostic_Pipeline(summary, cycle):
         "Action": decision["action"]
     }
 
-summary = pd.read_csv(rf"C:\Projects\Battery Engineering\Summary Files\Final_Results_Phase_3.csv")
-cycle = pd.read_csv(rf"C:\Projects\Battery Engineering\Summary Files\All_Batteries_Overall_Summary.csv")
+#summary = pd.read_csv(rf"C:\Projects\Battery Engineering\Summary Files\Final_Results_Phase_3.csv")
+#cycle = pd.read_csv(rf"C:\Projects\Battery Engineering\Summary Files\All_Batteries_Overall_Summary.csv")
 
 
 def run_diagnosis_pipeline(summary, cycle,save_path):
