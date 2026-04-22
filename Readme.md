@@ -173,10 +173,10 @@ Outputs:
 ![alt text](architecture.png)
 
 ## Screenshots
-![alt text](dashboard.png)
-![alt text](analysis.png)
-![alt text](api_response.png)
-![alt text](SwaggerUI.png)
+![alt text](images/dashboard.png)
+![alt text](images/analysis.png)
+![alt text](images/api_response.png)
+![alt text](images/SwaggerUI.png)
 
 ---
 
